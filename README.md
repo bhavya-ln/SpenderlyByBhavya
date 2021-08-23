@@ -22,5 +22,6 @@
  3. OTP Authentication
  4. A Profile Page 
  
- ## APK File in the github repo!
+ ## APK File
+ https://drive.google.com/drive/folders/1LYv7aXjZ6czozDEG45rLxIeQ00-i3bGU
  
