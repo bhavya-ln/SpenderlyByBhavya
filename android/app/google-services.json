@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "274883321437",
+    "project_id": "spenderly-9e38e",
+    "storage_bucket": "spenderly-9e38e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:274883321437:android:5acb5dd9d234870514b7b4",
+        "android_client_info": {
+          "package_name": "com.example.spenderly"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "274883321437-a6q352qrh6ossfh26pn75028f7tplpv2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1jAMaPytkugElO7RC3VSsyu_OB3ZRW0M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "274883321437-a6q352qrh6ossfh26pn75028f7tplpv2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
