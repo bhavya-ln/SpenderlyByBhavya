@@ -9,7 +9,6 @@ import 'package:lottie/lottie.dart';
 
 final user = FirebaseAuth.instance.currentUser!;
 var UID = user.uid;
-double sum = 0;
 
 class ShoppingCart extends StatefulWidget {
   @override
@@ -17,18 +16,36 @@ class ShoppingCart extends StatefulWidget {
 }
 
 class _ShoppingCartState extends State<ShoppingCart> {
-//Dont put this line outside the class, since outside it becomes a global variable and the values dont change and hence when you open the cart the next time it is stuck in a loading screen
-  final Stream<QuerySnapshot> _Cart = FirebaseFirestore.instance
-      .collection('Users')
-      .doc(UID)
-      .collection('Cart')
-      .snapshots();
-  
-  @override
-  void initState() {
-    super.initState();
+  double sum = 0;
+
+  bool check = false;
+
+  Future wait(int seconds) {
+    return new Future.delayed(Duration(seconds: seconds), () => {});
+  }
+
+  Future<void> setup() async {
     var uid = FirebaseAuth.instance.currentUser!.uid;
-    FirebaseFirestore.instance
+    double i = 0;
+
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(uid)
+        .collection('Cart')
+        .get()
+        .then((QuerySnapshot querySnapshot) async {
+      querySnapshot.docs.forEach((doc) {
+        i = i + doc['Price'];
+      });
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(uid)
+          .collection('Total')
+          .doc('Total')
+          .set({'Total Price': i});
+    });
+
+    await FirebaseFirestore.instance
         .collection('Users')
         .doc(uid)
         .collection('Total')
@@ -57,32 +74,40 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
         setState(() {
           sum = snap['Total Price'];
+          check = true;
         });
       }
     });
   }
 
+  final Stream<QuerySnapshot> _Cart = FirebaseFirestore.instance
+      .collection('Users')
+      .doc(UID)
+      .collection('Cart')
+      .snapshots();
+
   @override
   Widget build(BuildContext context) {
     var uid = FirebaseAuth.instance.currentUser!.uid;
-    double i = 0;
+    setup();
+    // double i = 0;
 
-    FirebaseFirestore.instance
-        .collection('Users')
-        .doc(uid)
-        .collection('Cart')
-        .get()
-        .then((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.forEach((doc) {
-        i = i + doc['Price'];
-      });
-      FirebaseFirestore.instance
-          .collection('Users')
-          .doc(uid)
-          .collection('Total')
-          .doc('Total')
-          .set({'Total Price': i});
-    });
+    // FirebaseFirestore.instance
+    //     .collection('Users')
+    //     .doc(uid)
+    //     .collection('Cart')
+    //     .get()
+    //     .then((QuerySnapshot querySnapshot) {
+    //   querySnapshot.docs.forEach((doc) {
+    //     i = i + doc['Price'];
+    //   });
+    //   FirebaseFirestore.instance
+    //       .collection('Users')
+    //       .doc(uid)
+    //       .collection('Total')
+    //       .doc('Total')
+    //       .set({'Total Price': i});
+    // });
     var height = MediaQuery.of(context).size.height;
     var width = MediaQuery.of(context).size.width;
 
@@ -103,7 +128,7 @@ class _ShoppingCartState extends State<ShoppingCart> {
                     onPressed: () {
                       Navigator.of(context).pushAndRemoveUntil(
                           MaterialPageRoute(builder: (context) => Fav()),
-                           (Route<dynamic> route) => false);
+                          (Route<dynamic> route) => false);
                     },
                     icon: Icon(
                       Icons.favorite_outline_rounded,
@@ -143,6 +168,15 @@ class _ShoppingCartState extends State<ShoppingCart> {
 
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Text("Loading");
+              }
+              if (check == false) {
+                return Scaffold(
+                    body: Container(
+                        height: height * 0.7,
+                        width: width,
+                        child: Center(
+                            child: Lottie.asset(
+                                'assets/lottie/9329-loading.json'))));
               }
               if (sum != 0) {
                 return new ListView(
@@ -267,12 +301,13 @@ class _ShoppingCartState extends State<ShoppingCart> {
                                                                     fontSize:
                                                                         16.0);
                                                                 Navigator.of(context).pushAndRemoveUntil(
-                                                                    
                                                                     MaterialPageRoute(
                                                                         builder:
                                                                             (context) =>
                                                                                 ShoppingCart()),
-                                                                                 (Route<dynamic> route) => false);
+                                                                    (Route<dynamic>
+                                                                            route) =>
+                                                                        false);
                                                               },
                                                               icon: Icon(
                                                                 Icons
@@ -303,7 +338,9 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   }).toList(),
                 );
               }
-              return Container(child: Lottie.asset('assets/lottie/4496-empty-cart.json') ,);
+              return Container(
+                child: Lottie.asset('assets/lottie/4496-empty-cart.json'),
+              );
             },
           ),
         ),
@@ -349,32 +386,30 @@ class _ShoppingCartState extends State<ShoppingCart> {
                   width: width * 0.1,
                 ),
                 ElevatedButton.icon(
-                    onPressed: () async{
+                    onPressed: () async {
                       var collection = FirebaseFirestore.instance
-                      .collection('Users')
-                      .doc(uid)
-                      .collection('Cart');
-                  var snapshots = await collection.get();
-                  for (var doc in snapshots.docs) {
-                    await doc.reference.delete();
-                  }
+                          .collection('Users')
+                          .doc(uid)
+                          .collection('Cart');
+                      var snapshots = await collection.get();
+                      for (var doc in snapshots.docs) {
+                        await doc.reference.delete();
+                      }
 
-                  setState(() {
-                    sum = 0;
-                  });
-                  Fluttertoast.showToast(
-                                                    msg: "Order confirmed",
-                                                    toastLength: Toast.LENGTH_LONG,
-                                                    gravity: ToastGravity.BOTTOM,
-                                                    timeInSecForIosWeb: 1,
-                                                    backgroundColor: Color(0xff7beed9),
-                                                    textColor: Colors.black,
-                                                    fontSize: 16.0);
-                    Navigator.of(context).pushAndRemoveUntil(
-                                 
-                                  MaterialPageRoute(
-                                      builder: (context) => Dashboard()),
-                                       (Route<dynamic> route) => false);                                
+                      setState(() {
+                        sum = 0;
+                      });
+                      Fluttertoast.showToast(
+                          msg: "Order confirmed",
+                          toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.BOTTOM,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Color(0xff7beed9),
+                          textColor: Colors.black,
+                          fontSize: 16.0);
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(builder: (context) => Dashboard()),
+                          (Route<dynamic> route) => false);
                     },
                     icon: Icon(Icons.payment_sharp, color: Color(0xffd4fff7)),
                     label: Text(
